@@ -64,6 +64,10 @@ import util.JCATMessageWindow;
 public class launch extends JCATCalls {
 
   public boolean create(String imagefile, String basefile) throws IOException {
+    return create(imagefile, basefile, null);
+  }
+  
+  public boolean create(String imagefile, String basefile, String calFilename) throws IOException {
     ///////////////////////////////////////
     // Establishes rootDir as the JCAT folder in home directory
     ///////////////////////////////////////
@@ -81,10 +85,12 @@ public class launch extends JCATCalls {
     basefile = FilenameUtils.getBaseName(basefile);
     imgfile = imagefile;
     if (basefile.substring(20, 21).toLowerCase().equals("j")) {
-
-      CRISM = new CRISMPDSImageNextGen(imgfile);
+  
+      CRISM = new CRISMPDSImageNextGen(imgfile, calFilename);
 
     } else {
+      JCATLog.getInstance().getLogger().log(Level.WARNING, "NOT SUPPORTED. This modified version only loads MTRDR files.");
+      
       File parent = new File(FilenameUtils.getFullPath(imgfile));
       String base = FilenameUtils.getName(imgfile);
       ddrFile = new File(parent,
@@ -178,9 +184,9 @@ public class launch extends JCATCalls {
     if (r.exists()) {
       readPropertiesFile();
     } else {
-      red = 304; // these are only three things stored in current properties file
-      green = 122;
-      blue = 41;
+      red = 29; // these are only three things stored in current properties file
+      green = 15;
+      blue = 2;
     }
 
     ///////////////////////////////////////////////////
@@ -211,8 +217,8 @@ public class launch extends JCATCalls {
     contrast.getItems().addAll(linStretch, per1Stretch, per2Stretch, perCStretch, subStretch);
 
     singlePixel.setToggleGroup(specAvgSizeTG);
-    singlePixel.setSelected(true);
     ninePixel.setToggleGroup(specAvgSizeTG);
+    ninePixel.setSelected(true);
     twentyFivePixel.setToggleGroup(specAvgSizeTG);
     specAvgSize.getItems().addAll(singlePixel, ninePixel, twentyFivePixel);
 
@@ -411,9 +417,10 @@ public class launch extends JCATCalls {
     // Creates a line chart with series for the intensity, RGB markers
     // Adds data, RGB, & saves name of data for reference in spectral operations
     ////////////////////////////////////////////////////
-    NumberAxis xAxis = new NumberAxis();
-    NumberAxis yAxis = new NumberAxis(0, 0.4, 0.05);
-    xAxis.setAutoRanging(true);
+    NumberAxis xAxis = new NumberAxis(380.0, 1100.0, 10.0);
+    NumberAxis yAxis = new NumberAxis(0.0, 0.3, 0.05);
+    yAxis.setAutoRanging(true);
+    xAxis.setAutoRanging(false);
     xAxis.setForceZeroInRange(false);
     LineChart<Number, Number> lc = new LineChart<Number, Number>(xAxis, yAxis);
     XYChart.Series<Number, Number> LCData = new XYChart.Series<Number, Number>(),
@@ -423,7 +430,7 @@ public class launch extends JCATCalls {
     gm.setName("Green");
     bm.setName("Blue");
     xAxis.setLabel("Wavelength (nm)");
-    yAxis.setLabel("Corrected I/F");
+    yAxis.setLabel("TOA I/F 380-1100, Corrected I/F 1100-3900");
 
     inputData(intensity, LCData, lc);
     inputMarkers(lc, rm, gm, bm);
@@ -1335,7 +1342,9 @@ public class launch extends JCATCalls {
         Dialog<Boolean> wait = waitMessage();
 
         List<Double> intensity2 = new ArrayList<Double>();
-        if (multSpec.isSelected() && a.getButton() == MouseButton.MIDDLE) {
+        // middle mouse button simulation on macOS with primary mouse button + Cmd key
+        if (multSpec.isSelected() && (a.getButton() == MouseButton.MIDDLE || (a.getButton() == MouseButton.PRIMARY && a.isMetaDown()))) {
+
           NumberAxis x = (NumberAxis) flc.getXAxis();
           NumberAxis y = (NumberAxis) flc.getYAxis();
           ObservableList<Series<Number, Number>> series = flc.getData();
@@ -1649,7 +1658,8 @@ public class launch extends JCATCalls {
         Dialog<Boolean> wait = waitMessage();
 
         List<Double> intensity2 = new ArrayList<Double>();
-        if (multSpec.isSelected() && a.getButton() == MouseButton.MIDDLE) {
+        // middle mouse button simulation on macOS with primary mouse button + Cmd key
+        if (multSpec.isSelected() && (a.getButton() == MouseButton.MIDDLE || (a.getButton() == MouseButton.PRIMARY && a.isMetaDown()))) {
           NumberAxis x = (NumberAxis) flc.getXAxis();
           NumberAxis y = (NumberAxis) flc.getYAxis();
           ObservableList<Series<Number, Number>> series = flc.getData();

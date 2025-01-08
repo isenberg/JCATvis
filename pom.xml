@@ -5,15 +5,15 @@
 	<groupId>jcat</groupId>
 	<artifactId>jcat</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>JCAT</name>
-	<description>Java CRISM Analysis Tool</description>
+	<name>JCATvis</name>
+	<description>Java CRISM Analysis Tool modified for visual bands</description>
 	<organization>
-		<name>Johns Hopkins University Applied Physics Lab</name>
+		<name>modified JCATvis Holger Isenberg https://areo.info, original JCAT: Johns Hopkins University Applied Physics Lab</name>
 		<url>https://www.jhuapl.edu</url>
 	</organization>
 
 	<properties>
-		<package>JCAT</package>
+		<package>JCATvis</package>
 
 		<mainClass>app.runJCAT</mainClass>
 

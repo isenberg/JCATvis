@@ -1,5 +1,6 @@
 package reader;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,15 +20,23 @@ import util.JCATLog;
 public class CRISMPDSImageNextGen extends CRISMPDSImage {
 
   private DDR ddr;
+  private List<Float> calibrationSpectrum;
+  float calmin = 380;
+  float calmax = 780;
+  float dw = 6.5F;
   public LinkedHashMap<Integer, String> bandMapSU;
 
   public CRISMPDSImageNextGen(String filename) {
 
-    this(filename, null);
+    this(filename, null, (String)null);
 
   }
 
-  public CRISMPDSImageNextGen(String filename, String ddrFilename) {
+  public CRISMPDSImageNextGen(String filename, String calFilename) {
+    this(filename, (String)null, calFilename);  
+  }
+  
+  public CRISMPDSImageNextGen(String filename, String ddrFilename, String calFilename) {
     super(filename);
 
     JCATLog.getInstance().getLogger().log(Level.FINER, "Instantiating CRISMPDSImageNextGen object");
@@ -36,6 +45,39 @@ public class CRISMPDSImageNextGen extends CRISMPDSImage {
     String wavelengthTable =
         FilenameUtils.getFullPath(filename) + FilenameUtils.getName(filename).replaceAll("if", "wv")
             .replaceAll(".img", ".tab").replaceAll("IF", "WV").replaceAll(".IMG", ".TAB");
+
+    if(calFilename != null) {
+      JCATLog.getInstance().getLogger().log(Level.INFO, "Loading calibration file \"" + calFilename + "\"");
+      try (BufferedReader br = new BufferedReader(new FileReader(calFilename))) {
+        String line;
+        float min=Float.MAX_VALUE;
+        float max=0;
+        List<Float> calibrationSpectrumRaw = new ArrayList<Float>();
+        calibrationSpectrum = new ArrayList<Float>();
+        int iw=0;
+        while ((line = br.readLine()) != null && ((iw*dw+calmin)<calmax)) {
+          String[] values = line.split(",");
+          float val = Float.parseFloat(values[2]);
+          calibrationSpectrumRaw.add(val);
+          // skip bad bands
+          if (val != 65535) {
+            min = Math.min(val,  min);
+            max = Math.max(val,  max);
+          }
+        }
+        for (float f: calibrationSpectrumRaw) {
+          // for soil frt000128f3_07_if165j_mtr3_spectrum_soil.csv:
+          calibrationSpectrum.add(f/max);
+          // for ice frt000244c9_07_if168s_trr3_spectrum_snow.csv:
+          //calibrationSpectrum.add((f-min)/(max-min)*6);
+        }
+      } catch (IOException ex) {
+        JCATLog.getInstance().getLogger().log(Level.WARNING, "Failed to load calibration file \"" + calFilename + "\": " + ex.getMessage());
+      }
+    } else {
+      //JCATLog.getInstance().getLogger().log(Level.WARNING, "No calibration file provided");
+      calibrationSpectrum = null;
+    }
 
     if (FilenameUtils.getBaseName(filename).substring(22).toLowerCase().startsWith("ter")) {
       ddrFilename = filename.replaceAll("if", "de").replaceAll("j", "l").replaceAll("ter3", "ddr1")
@@ -175,4 +217,14 @@ public class CRISMPDSImageNextGen extends CRISMPDSImage {
     }
   }
 
+  public float getPCFloatValue(int imageDataOffset, int dataBitCount, int band) {
+    float result = super.getPCFloatValue(imageDataOffset, dataBitCount, band);
+    // skip bad bands
+    if (calibrationSpectrum != null && result != 65535 && band < calibrationSpectrum.size()) {
+      return result / calibrationSpectrum.get(band);
+    } else {
+      return result;
+    }
+  }
+  
 }

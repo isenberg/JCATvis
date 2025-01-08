@@ -28,12 +28,15 @@ function make_scripts() {
     binDir=${root}/unix
     batchDir=${root}/windows
     libDir=${root}/lib
+    calibDir=${root}/calib
 
     mkdir -p ${binDir}
 	mkdir -p ${batchDir}
     mkdir -p ${libDir}
+    mkdir -p ${calibDir}
     rsync -a target/${package}.jar ${libDir}
     rsync -a target/${package}_lib ${libDir}
+	rsync -a src/main/resources/resources/calib/ ${calibDir}
 
     for class in $(jar tf target/${package}.jar  | grep $appSrcDir | grep -v '\$' | grep class); do
 	base=$(basename $class ".class")
@@ -91,7 +94,7 @@ function make_scripts() {
 
 ### Don't need to modify anything below this line
 
-package=JCAT
+package=JCATvis
 root=${package}-$(date "+%Y.%m.%d")
 
 java=$(which java)

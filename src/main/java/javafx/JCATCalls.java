@@ -10,13 +10,13 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
 import java.util.logging.Level;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import com.sun.javafx.charts.Legend;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -28,6 +28,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -37,6 +38,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
 import reader.ADR;
 import reader.ADRPairings;
@@ -1106,19 +1108,24 @@ public class JCATCalls extends Application {
       XYChart.Series<Number, Number> gm, XYChart.Series<Number, Number> bm) {
     JCATLog.getInstance().getLogger().log(Level.FINEST, "Entering method styleChart");
     for (Node n : lc.getChildrenUnmodifiable()) {
-      if (n instanceof Legend) {
-        for (Legend.LegendItem legendItem : ((Legend) n).getItems()) {
-          if (legendItem.getText() == "Red") {
-            legendItem.getSymbol().setVisible(false);
-            legendItem.setText("");
-          }
-          if (legendItem.getText() == "Green") {
-            legendItem.getSymbol().setVisible(false);
-            legendItem.setText("");
-          }
-          if (legendItem.getText() == "Blue") {
-            legendItem.getSymbol().setVisible(false);
-            legendItem.setText("");
+      if (n instanceof TilePane) {
+        Iterator legendItemIterator = ((TilePane) n).getChildrenUnmodifiable().iterator();
+        while(legendItemIterator.hasNext()) {
+          Object legendItemObject = legendItemIterator.next();
+          if(legendItemObject instanceof Label) {
+            Label legendItem = (Label)legendItemObject;
+            if (legendItem.getText() == "Red") {
+              legendItem.setVisible(false);
+              legendItem.setText("");
+            }
+            if (legendItem.getText() == "Green") {
+              legendItem.setVisible(false);
+              legendItem.setText("");
+            }
+            if (legendItem.getText() == "Blue") {
+              legendItem.setVisible(false);
+              legendItem.setText("");
+            }
           }
         }
       }

@@ -7,7 +7,10 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -42,6 +45,9 @@ import util.JCATMessageWindow;
 
 public class buildGUI extends launch {
 
+  static String calfile = null;
+  static List<String> imgfiles = new ArrayList<String>();
+  
   public static void main(String args[]) {
     Application.launch(args);
   }
@@ -49,6 +55,35 @@ public class buildGUI extends launch {
   @Override
   public void start(Stage stage) {
     try {
+      Parameters parameters = getParameters ();
+      List<String> unnamedParameters = parameters.getUnnamed ();
+      Iterator<String> params = unnamedParameters.iterator();
+      while(params.hasNext()) {
+        String p = params.next();
+        switch(p) {
+        case "-h":
+        case "--help":
+          System.out.println("usage: runJCAT [-c CALFILE] IMGFILE [IMGFILE...]");
+          System.out.println("  -c CALFILE: CVS file to read spectrum of white surface for calibration from.\n For example exported previously with JCAT from polar snow surface in frt000128f3_07_if165j_mtr3.img.");
+          System.out.println("  IMGFILE: MRO CRISM if*_mtr3.img file(s)");
+          Platform.exit();
+          System.exit(0);
+          break;
+        case "-c":
+          if(params.hasNext()) {
+            calfile = params.next();
+            System.out.println("calibration CSV: " + new File(calfile).getCanonicalPath());
+          }
+          break;
+        default:
+          File f = new File(p);
+          if (f.canRead()) {
+            System.out.println("image: " + f.getCanonicalPath());
+            imgfiles.add(p);
+          }
+          break;
+        }
+      }
       JCATLog.getInstance().getLogger().log(Level.INFO, AppVersion.getVersionString());
       JCATLog.getInstance().getLogger().log(Level.INFO,
           "Running Java " + System.getProperty("java.version"));
@@ -66,8 +101,8 @@ public class buildGUI extends launch {
     // Creates main window, adds File, Browser and Help menus with menu items
     ///////////////////////////////////////////////////////////
     HBox root1 = new HBox();
-    Scene scene1 = new Scene(root1, 400, 200);
-    stage1.setTitle("Java CRISM Analysis Tool");
+    Scene scene1 = new Scene(root1, 450, 200);
+    stage1.setTitle("Java CRISM Analysis Tool, modified for visual bands");
     stage1.setScene(scene1);
     stage1.setOnCloseRequest(e -> Platform.exit());
     stage1.show();
@@ -246,6 +281,24 @@ public class buildGUI extends launch {
 
     fileMenu.getItems().add(quit);
     root1.getChildren().add(mbar);
+    
+    for (String imgfile: imgfiles) {
+      String basefile = imgfile.replace(".img", "");
+      if (FilenameUtils.getBaseName(basefile).substring(15).toLowerCase().startsWith("su")) {
+        MTRDRSummaryParameters j = new MTRDRSummaryParameters();
+        if (!j.create(imgfile, basefile)) {
+          JCATLog.getInstance().getLogger().log(Level.WARNING, "Error opening file: " + imgfile);
+          return;
+        }
+      } else {
+        JCATLog.getInstance().getLogger().log(Level.INFO, "Opening file with calibration: " + imgfile);
+        launch jx = new launch();
+        if (!jx.create(imgfile, basefile, calfile)) {
+          JCATLog.getInstance().getLogger().log(Level.WARNING, "Error opening file: " + imgfile);
+          return;
+        }
+      }
+    }
   }
 
   ///////////////////////////////////////////////////////////
