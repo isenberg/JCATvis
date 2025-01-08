@@ -31,7 +31,7 @@ Example:
 * `hrl0000d349_07_if182j_mtr3.lbl`
 * `hrl0000d349_07_wv182j_mtr3.tab`
 
-![](./doc/screenshot.png | width=500)
+![](./doc/screenshot.png)
 
 JCATvis is a free analysis tool for Compact Reconnaissance Imaging Spectrometer for Mars (CRISM) data products. It is released under the MIT license.
 
