@@ -59,4 +59,5 @@ There is a tutorial PDF available when running JCAT. Under the _Help_ tab, click
 
 The _Show Log_ button is useful for debugging.
 
+For true color hyperspectral images: https://github.com/isenberg/improved-color-from-crism
 
