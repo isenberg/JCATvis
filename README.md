@@ -37,7 +37,7 @@ JCATvis is a free analysis tool for Compact Reconnaissance Imaging Spectrometer 
 ## Installation
 Clone this repository from the command line:
 ```
-> git clone git@github.com/isenberg/JCATvis.git
+> git clone https://github.com/isenberg/JCATvis.git
 ```
 In the cloned folder ('JCATvis'), run the mkPackage.bash script:
 ```
