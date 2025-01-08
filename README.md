@@ -11,9 +11,9 @@ Only 1100 - 3900nm uses true I/F in the original JCAT, based on volcano scan in 
 Runs on JavaFX 8 and 17, for example Zulu JRE FX 17.
 
 ```
-usage: java JCATvis.jar [-c CALFILE] IMGFILE [IMGFILE...]
+usage: ./jcatvis.sh [-c CALFILE] IMGFILE [IMGFILE...]
   -c CALFILE: CVS file to read spectrum of white surface for calibration from.
-              Example: JCATvis-2025.01.07/calib/frt000128f3_07_if165j_mtr3_spectrum_soil.csv
+              Example: src/main/resources/resources/calib/frt000128f3_07_if165j_mtr3_spectrum_soil.csv
   IMGFILE: MRO CRISM *_if*_mtr3.img file(s)
 ```
 
